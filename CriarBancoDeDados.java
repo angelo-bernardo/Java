@@ -1,17 +1,17 @@
 import java.sql.*;
 
 public class CriarBancoDeDados {
-    public static void main(String[] args) throws Exception {
+    public static Boolean criar(String[] args) throws Exception {
         try {
             Connection conexao = MySQLConnector.conectar();
-            String strSqlCriarBancoDeDados = "create database `db_teste`;";
+            String strSqlCriarBancoDeDados = "CREATE DATABASE IF NOT EXISTS `" + args[0] + "`;";
             Statement stmSqlCriarBancoDeDados = conexao.createStatement();
             stmSqlCriarBancoDeDados.addBatch(strSqlCriarBancoDeDados);
             stmSqlCriarBancoDeDados.executeBatch();
             stmSqlCriarBancoDeDados.close();
-            // System.out.println("Banco de dados criado com sucesso!");
+            return true;
         } catch (Exception e) {
-            // System.out.println("Ocorreu erro ao executar o comando: " + e);
+            return false;
         }
     }
 }
