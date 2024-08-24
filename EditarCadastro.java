@@ -298,10 +298,14 @@ public class EditarCadastro extends JFrame {
                     String[] campos = cadastro(1);
                     String[] valores = cadastro(2);
                     try {
-                        resultado = NavegadorDeRegistro.registro(dbString, tblString, campos, valores, "consultar");
+                        resultado = NavegadorDeRegistro.registro(dbString, tblString, campos, valores, "irpara");
                     } catch (Exception ex) {
                     }
-                    carregarCampos(resultado);
+                    if (resultado == null) {
+                        limparCampos();
+                    } else {
+                        carregarCampos(resultado);
+                    }
                 } else {
                     limparCampos();
                     habilitarNavegacao(true, false, false, true);
