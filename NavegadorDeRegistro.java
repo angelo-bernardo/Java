@@ -4,11 +4,15 @@ public class NavegadorDeRegistro {
     public static String[] registro(String db, String tbl, String[] campos, String[] valores, String botao) throws Exception {
         int qtde = 0;
         for (int i = 0; i < campos.length; i++) {
-            if (campos[i] != "") { //campo 0 pode estar vazio quando for incluir registro
+            if (campos[i] != "") {
                 qtde++;
             }
         };
         if (qtde == 0) return null;
+        String[] args = {db, tbl};
+        if (!CriarBancoDeDados.criar(args)) return null;
+        if (!CriarTabela.criar(args)) return null;
+
         Connection conexao = null;
         Statement stmSqlRegistro = null;
         ResultSet rstSqlRegistro = null;
@@ -37,8 +41,6 @@ public class NavegadorDeRegistro {
             botao = "consultar";
             juncao = "OR";
         }
-        System.out.println(botao);
-System.out.println(juncao);
         switch (botao) {
             case "anterior":
             case "próximo":
@@ -107,11 +109,9 @@ System.out.println(juncao);
         try {
             conexao = MySQLConnector.conectar();
             stmSqlRegistro = conexao.createStatement();
-            if (botao == "incluir" || botao == "alterar" || botao == "excluir") {
+            if (botao.equals("incluir") || botao.equals("alterar") || botao.equals("excluir")) {
                 PreparedStatement ps = conexao.prepareStatement(atualizarSQL);
-                int linhasAfetadas = ps.executeUpdate();
-                System.out.println(atualizarSQL);
-    
+                int linhasAfetadas = ps.executeUpdate();    
                 if (linhasAfetadas > 0) {
                     for (int i = 1; i < qtde; i++) {
                         campos[i] = "";
@@ -125,9 +125,7 @@ System.out.println(juncao);
                 }        
             } else {
                 PreparedStatement ps = conexao.prepareStatement(navegarSQL);
-                rstSqlRegistro = ps.executeQuery();
-                System.out.println(navegarSQL);
-    
+                rstSqlRegistro = ps.executeQuery();    
                 if (rstSqlRegistro.next()) {
                     resultado = new String[] {
                         rstSqlRegistro.getString("id"),
