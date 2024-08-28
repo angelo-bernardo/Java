@@ -1,17 +1,16 @@
 import java.sql.*;
 
 public class NavegadorDeRegistro {
-    public static String[] registro(String db, String tbl, String[] campos, String[] valores, String botao) throws Exception {
+    public static String[] registro(String[] tabela, String[][] campos, String botao) throws Exception {
         int qtde = 0;
-        for (int i = 0; i < campos.length; i++) {
-            if (campos[i] != "") {
+        for (int i = 0; i < campos[1].length; i++) {
+            if (campos[1][i] != "") {
                 qtde++;
             }
         };
         if (qtde == 0) return null;
-        String[] args = {db, tbl};
-        if (!CriarBancoDeDados.criar(args)) return null;
-        if (!CriarTabela.criar(args)) return null;
+        if (!CriarBancoDeDados.criar(tabela)) return null;
+        if (!CriarTabela.criar(tabela)) return null;
 
         Connection conexao = null;
         Statement stmSqlRegistro = null;
@@ -19,7 +18,7 @@ public class NavegadorDeRegistro {
         String[] resultado = null;
         String atualizarSQL = null;
 
-        String navegarSQL = "SELECT * FROM `" + db + "`.`" + tbl + "` ";
+        String navegarSQL = "SELECT * FROM `" + tabela[0] + "`.`" + tabela[1] + "` ";
         String navegarSQLMeio = "";
         String navegarSQLFinal = " ORDER BY ";
         String comparar = "";
@@ -46,34 +45,34 @@ public class NavegadorDeRegistro {
             case "próximo":
                 navegarSQLMeio = " WHERE ( ";
                 if (qtde == 1) {
-                    navegarSQLMeio += campos[0] + " " + comparar + " '" + valores[0] + "' ) ";
+                    navegarSQLMeio += campos[0][0] + " " + comparar + " '" + campos[1][0] + "' ) ";
                 } else {
-                    navegarSQLMeio += campos[1] + " = '" + valores[1] + "' AND id " + comparar + " " + valores[0] + " ) OR ( " +  campos[1] + " " + comparar + " '" + valores[1] + "' ) ";
+                    navegarSQLMeio += campos[0][1] + " = '" + campos[1][1] + "' AND id " + comparar + " " + campos[1][0] + " ) OR ( " +  campos[0][1] + " " + comparar + " '" + campos[1][1] + "' ) ";
                 }
                 break;
             case "consultar":
                 navegarSQLMeio = " WHERE ( ";
                 for (Integer i = 1; i < qtde; i++) {
-                    navegarSQLMeio += campos[i] + " LIKE '" + valores[i] + "%' ) ";
+                    navegarSQLMeio += campos[0][i] + " LIKE '" + campos[1][i] + "%' ) ";
                     if ((qtde - i) > 1) {
                         navegarSQLMeio += " " + juncao + " ( ";
                     } 
                 }
                 break;
             case "irpara":
-                navegarSQLMeio = " WHERE ( " + campos[0] + " = " + valores[0] + " ) ";
+                navegarSQLMeio = " WHERE ( " + campos[0][0] + " = " + campos[1][0] + " ) ";
                 break;
             case "incluir":
-                atualizarSQL = "INSERT INTO `" + db + "`.`" + tbl + "` ( ";
+                atualizarSQL = "INSERT INTO `" + tabela[0] + "`.`" + tabela[1] + "` ( ";
                 for (int i = 1; i < qtde; i++) {
-                    atualizarSQL += campos[i];
+                    atualizarSQL += campos[0][i];
                     if ((qtde - i) > 1 ){
                         atualizarSQL += ", ";
                     }
                 };
                 atualizarSQL += " ) VALUES ( ";
                 for (int i = 1; i < qtde; i++) {
-                    atualizarSQL += "'" + valores[i] + "'";
+                    atualizarSQL += "'" + campos[1][i] + "'";
                     if ((qtde - i) > 1 ){
                         atualizarSQL += ", ";
                     }
@@ -81,26 +80,24 @@ public class NavegadorDeRegistro {
                 atualizarSQL += " );";
                 break;
             case "alterar":
-                if (qtde == 0) return null;
-                atualizarSQL = "UPDATE `" + db + "`.`" + tbl + "` SET ";
+                atualizarSQL = "UPDATE `" + tabela[0] + "`.`" + tabela[1] + "` SET ";
                 for (int i = 1; i < qtde; i++) {
-                    atualizarSQL += campos[i] + " = '" + valores[i] + "'";
+                    atualizarSQL += campos[0][i] + " = '" + campos[1][i] + "'";
                     if ((qtde - i) > 1 ){
                         atualizarSQL += ", ";
                     }
                 };
-                atualizarSQL += " WHERE " + campos[0] + " = '" + valores[0] + "';";
+                atualizarSQL += " WHERE " + campos[0][0] + " = '" + campos[1][0] + "';";
                 break;
             case "excluir":
-                if (qtde == 0) return null;
-                atualizarSQL = "DELETE FROM `" + db + "`.`" + tbl + "` WHERE " + campos[0] + " = '" + valores[0] + "';";
+                atualizarSQL = "DELETE FROM `" + tabela[0] + "`.`" + tabela[1] + "` WHERE " + campos[0][0] + " = '" + campos[1][0] + "';";
                 break;
             default:
                 break;
         }
         if (qtde > 1) {
             for (Integer i = 1; i < qtde; i++){
-                navegarSQLFinal += campos[i] + " " + ordenar + ", ";
+                navegarSQLFinal += campos[0][i] + " " + ordenar + ", ";
             }    
         }
         navegarSQLFinal += " id " + ordenar + " LIMIT 1;";
@@ -110,20 +107,22 @@ public class NavegadorDeRegistro {
             conexao = MySQLConnector.conectar();
             stmSqlRegistro = conexao.createStatement();
             if (botao.equals("incluir") || botao.equals("alterar") || botao.equals("excluir")) {
+                System.out.println(atualizarSQL);
                 PreparedStatement ps = conexao.prepareStatement(atualizarSQL);
                 int linhasAfetadas = ps.executeUpdate();    
                 if (linhasAfetadas > 0) {
                     for (int i = 1; i < qtde; i++) {
-                        campos[i] = "";
-                        valores[i] = "";
+                        campos[0][i] = "";
+                        campos[1][i] = "";
                     }
-                    if (botao.equals("incluir")) resultado = registro(db, tbl, campos, valores, "último");
-                    if (botao.equals("alterar")) resultado = registro(db, tbl, campos, valores, "irpara");
+                    if (botao.equals("incluir")) resultado = registro(tabela, campos, "último");
+                    if (botao.equals("alterar")) resultado = registro(tabela, campos, "irpara");
                     if (botao.equals("excluir")) resultado = null;
                 } else {
                     resultado = null;
                 }        
             } else {
+                System.out.println(navegarSQL);
                 PreparedStatement ps = conexao.prepareStatement(navegarSQL);
                 rstSqlRegistro = ps.executeQuery();    
                 if (rstSqlRegistro.next()) {
