@@ -37,8 +37,7 @@ public class EditarCadastro extends JFrame {
     private final ButtonGroup juncaoGroup;
     private String campo = null;
     private String juncao = null;
-    private String dbString = "db_teste";
-    private String tblString = "tbl_teste";
+    private String[] tabela = {"db_teste", "tbl_teste"};
 
     public EditarCadastro() {
         super("Editar Cadastro");
@@ -93,10 +92,9 @@ public class EditarCadastro extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String[] resultado = null;
-                String[] campos = parametrosNavegacao(1);
-                String[] valores = parametrosNavegacao(2);
+                String[][] campos = parametrosNavegacao();
                 try {
-                    resultado = NavegadorDeRegistro.registro(dbString, tblString, campos, valores, "primeiro");
+                    resultado = NavegadorDeRegistro.registro(tabela, campos, "primeiro");
                     notificacaoJLabel.setText("Primeiro registro posicionado com sucesso!");
                     carregarCampos(resultado);
                 } catch (Exception ex) {
@@ -110,10 +108,9 @@ public class EditarCadastro extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String[] resultado = null;
-                String[] campos = parametrosNavegacao(1);
-                String[] valores = parametrosNavegacao(2);
+                String[][] campos = parametrosNavegacao();
                 try {
-                    resultado = NavegadorDeRegistro.registro(dbString, tblString, campos, valores, "anterior");
+                    resultado = NavegadorDeRegistro.registro(tabela, campos, "anterior");
                     notificacaoJLabel.setText("Registro anterior posicionado com sucesso!");
                     habilitarNavegacao(true, true, true, true);
                     carregarCampos(resultado);
@@ -128,10 +125,9 @@ public class EditarCadastro extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String[] resultado = null;
-                String[] campos = parametrosNavegacao(1);
-                String[] valores = parametrosNavegacao(2);
+                String[][] campos = parametrosNavegacao();
                 try {
-                    resultado = NavegadorDeRegistro.registro(dbString, tblString, campos, valores, "próximo");
+                    resultado = NavegadorDeRegistro.registro(tabela, campos, "próximo");
                     notificacaoJLabel.setText("Próximo registro posicionado com sucesso!");
                     habilitarNavegacao(true, true, true, true);
                     carregarCampos(resultado);
@@ -146,10 +142,9 @@ public class EditarCadastro extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String[] resultado = null;
-                String[] campos = parametrosNavegacao(1);
-                String[] valores = parametrosNavegacao(2);
+                String[][] campos = parametrosNavegacao();
                 try {
-                    resultado = NavegadorDeRegistro.registro(dbString, tblString, campos, valores, "último");
+                    resultado = NavegadorDeRegistro.registro(tabela, campos, "último");
                     notificacaoJLabel.setText("Último registro posicionado com sucesso!");
                     carregarCampos(resultado);
                 } catch (Exception ex) {
@@ -181,10 +176,9 @@ public class EditarCadastro extends JFrame {
                 if (cancelarAcao("incluir", "Inclusão")) return;
 
                 String[] resultado = null;
-                String[] campos = cadastro(1);
-                String[] valores = cadastro(2);
+                String[][] campos = cadastro();
                 try {
-                    resultado = NavegadorDeRegistro.registro(dbString, tblString, campos, valores, "incluir");
+                    resultado = NavegadorDeRegistro.registro(tabela, campos, "incluir");
                     carregarCampos(resultado);
                     habilitarCampos(false,false,false);
                     habilitarNavegacao(true, true, true, true);
@@ -210,35 +204,31 @@ public class EditarCadastro extends JFrame {
             }
             if (consultarJButton.getText().equals("Procurar")) {
                 String[] resultado = null;
-                String[] campos = null;
-                String[] valores = null;
+                String[][] campos = null;
                 String nome = nomeTextField.getText();
                 String email = emailTextField.getText();
                 if (!nome.trim().isEmpty()) {
                     nomeButton.setSelected(true);
                     campo = "nome";
-                    campos = parametrosNavegacao(1);
-                    valores = parametrosNavegacao(2);
+                    campos = parametrosNavegacao();
                 }
                 if (!email.trim().isEmpty()) {
                     if (campos == null) {
                         emailButton.setSelected(true);
                         campo = "email";
-                        campos = parametrosNavegacao(1);
-                        valores = parametrosNavegacao(2);
+                        campos = parametrosNavegacao();
                     } else {
-                        campos[2] = "email";
-                        valores[2] = emailTextField.getText();
+                        campos[0][2] = "email";
+                        campos[1][2] = emailTextField.getText();
                     }
                 }
                 if (campos == null) {
-                    campos = parametrosNavegacao(1);
-                    valores = parametrosNavegacao(2);
-                    campos[1] = "nome";
-                    valores[1] = nomeTextField.getText();
+                    campos = parametrosNavegacao();
+                    campos[0][1] = "nome";
+                    campos[1][1] = nomeTextField.getText();
                 }
                 try {
-                    resultado = NavegadorDeRegistro.registro(dbString, tblString, campos, valores, "consultar_"+juncao);
+                    resultado = NavegadorDeRegistro.registro(tabela, campos, "consultar_"+juncao);
                     notificacaoJLabel.setText("Registro posicionado com sucesso!");
                     carregarCampos(resultado);
                     mostrarJuncao(false);
@@ -274,10 +264,9 @@ public class EditarCadastro extends JFrame {
                 if (cancelarAcao("alterar", "Alteração")) return;
 
                 String[] resultado = null;
-                String[] campos = cadastro(1);
-                String[] valores = cadastro(2);
+                String[][] campos = cadastro();
                 try {
-                    resultado = NavegadorDeRegistro.registro(dbString, tblString, campos, valores, "alterar");
+                    resultado = NavegadorDeRegistro.registro(tabela, campos, "alterar");
                     carregarCampos(resultado);
                     habilitarCampos(false,false,false);
                     habilitarNavegacao(true, true, true, true);
@@ -295,10 +284,9 @@ public class EditarCadastro extends JFrame {
                 habilitarNavegacao(true, true, true, true);
                 if (alterarJButton.getText().equals("Gravar")) {
                     String[] resultado = null;
-                    String[] campos = cadastro(1);
-                    String[] valores = cadastro(2);
+                    String[][] campos = cadastro();
                     try {
-                        resultado = NavegadorDeRegistro.registro(dbString, tblString, campos, valores, "irpara");
+                        resultado = NavegadorDeRegistro.registro(tabela, campos, "irpara");
                     } catch (Exception ex) {
                     }
                     if (resultado == null) {
@@ -321,10 +309,9 @@ public class EditarCadastro extends JFrame {
 
                 if (cancelarAcao("excluir", "Exclusão")) return;
 
-                String[] campos = parametrosNavegacao(1);
-                String[] valores = parametrosNavegacao(2);
+                String[][] campos = parametrosNavegacao();
                 try {
-                    NavegadorDeRegistro.registro(dbString, tblString, campos, valores, "excluir");
+                    NavegadorDeRegistro.registro(tabela, campos, "excluir");
                 } catch (Exception ex) {
                     notificacaoJLabel.setText("Ocorreu erro ao executar o comando: " + ex);
                     return;
@@ -576,30 +563,23 @@ public class EditarCadastro extends JFrame {
         return true;
     }
 
-    public String[] parametrosNavegacao(int opcao) {
-        String[] campos = {"", "", "", ""};
-        String[] valores = {"", "", "", ""};
-        campos[0] = "id";
-        valores[0] = idTextField.getText();
-        if (!campos[0].equals(campo)) {
-            campos[1] = campo;
-            valores[1] = campoPesquisa();
+    public String[][] parametrosNavegacao() {
+        String[][] campos = {{"", "", "", ""}, {"", "", "", ""}};
+        campos[0][0] = "id";
+        campos[1][0] = idTextField.getText();
+        if (!campos[0][0].equals(campo)) {
+            campos[0][1] = campo;
+            campos[1][1] = campoPesquisa();
         }
-        if (opcao == 1) {
-            return campos;
-        } else {
-            return valores;
-        }
+        return campos;
     }
 
-    public String[] cadastro(int opcao) {
-        String[] campos = {"id", "nome", "email", "senha"};
-        String[] valores = {idTextField.getText(), nomeTextField.getText(), emailTextField.getText(), new String(senhaPasswordField.getPassword())};
-        if (opcao == 1) {
-            return campos;
-        } else {
-            return valores;
-        }
+    public String[][] cadastro() {
+        String[][] campos = {
+            {"id", "nome", "email", "senha"},
+            {idTextField.getText(), nomeTextField.getText(), emailTextField.getText(), new String(senhaPasswordField.getPassword())}
+        };
+        return campos;
     }
 
     public String campoPesquisa() {
